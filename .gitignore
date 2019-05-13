@@ -1,0 +1,4 @@
+_skbuild
+*.egg-info
+dist/
+.DS_Store

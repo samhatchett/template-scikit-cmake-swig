@@ -1,0 +1,34 @@
+FIND_PACKAGE(SWIG REQUIRED)
+INCLUDE(${SWIG_USE_FILE})
+
+FIND_PACKAGE(PythonLibs)
+INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+INCLUDE_DIRECTORIES(MyLib/include)
+SET(CMAKE_SWIG_FLAGS "")
+#set(CMAKE_SWIG_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/../../../mypylib/)
+
+add_subdirectory(MyLib)
+
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+swig_add_library( mypylib LANGUAGE python SOURCES mypylib.i)
+SET_SOURCE_FILES_PROPERTIES(mypylib.i PROPERTIES CPLUSPLUS ON)
+SET_SOURCE_FILES_PROPERTIES(mypylib.i PROPERTIES SWIG_FLAGS "-includeall")
+set_property(SOURCE mypylib.i PROPERTY USE_LIBRARY_INCLUDE_DIRECTORIES TRUE)
+set_property(TARGET mylib PROPERTY SWIG_USE_TARGET_INCLUDE_DIRECTORIES TRUE)
+swig_link_libraries(mypylib mylib)
+swig_link_libraries(mypylib ${PYTHON_LIBRARIES})
+
+install(TARGETS _mypylib
+          LIBRARY DESTINATION lib)
+
+add_custom_command(
+        TARGET _mypylib POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${CMAKE_CURRENT_BINARY_DIR}/mypylib.py
+                ${CMAKE_CURRENT_BINARY_DIR}/../../../mypylib/mypylib.py)
+
+
+
+#file(COPY ${CMAKE_CURRENT_BINARY_DIR}/mypylib.py DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../)
